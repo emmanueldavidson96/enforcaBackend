@@ -1,36 +1,113 @@
 import { Server, Socket } from "socket.io";
 import { UserModel as User } from "../model/User.Model";
+import { Group } from "../model/Group.Model";
+import { Chat } from "../model/Chat.Model";
 
-export const registerChatHandlers = (io:Server, socket:Socket) => {
+export const registerChatHandlers = (io: Server, socket: Socket) => {
   const id = socket.handshake.auth.id;
-  console.log("A new socket connected", id);
-  //   write the socket event handlers
 
+  // Add the new socket ID to the user's array of socket IDs
   const updateOnlineStatus = async () => {
-    socket.broadcast.emit("currentlyOnline", { id });
-    await User.findByIdAndUpdate(id, { isOnline: true });
+    const user = await User.findById(id);
+    if (user) {
+      user.isOnline = true;
+      if (!user.socketIds.includes(socket.id)) {
+        user.socketIds.push(socket.id);
+      }
+      await user.save();
+      socket.broadcast.emit("currentlyOnline", { id });
+    }
   };
 
-  const handleNewChats = (data:any) => {
-    socket.broadcast.emit("loadNewChats", data);
+  // Handle new chats
+  const handleNewChats = async (data: any) => {
+    const { senderId, receiverId, groupId, message } = data;
+
+    if (groupId) {
+      // Group chat handling
+      const group = await Group.findById(groupId).select("members");
+      if (group) {
+        group.members.forEach(async (member) => {
+          if (member.toString() !== senderId) {
+            const memberData = await User.findById(member).select("socketIds");
+            memberData?.socketIds.forEach((socketId) => {
+              socket.to(socketId).emit("group:message", {
+                groupId,
+                senderId,
+                message,
+              });
+            });
+          }
+        });
+      }
+    } else if (receiverId) {
+      // Personal chat handling
+      const receiver = await User.findById(receiverId).select("socketIds");
+      receiver?.socketIds.forEach((socketId) => {
+        socket.to(socketId).emit("personal:message", { senderId, message });
+      });
+    }
   };
 
-  const handleDeletedChat = (id:string) => {
-    socket.broadcast.emit("clearDeletedChats", { id });
+  // Handle chat deletion
+  const handleDeletedChat = async (data: { chatId: string; groupId?: string }) => {
+    const { chatId, groupId } = data;
+
+    if (groupId) {
+      const group = await Group.findById(groupId).select("members");
+      if (group) {
+        group.members.forEach(async (member) => {
+          const memberData = await User.findById(member).select("socketIds");
+          memberData?.socketIds.forEach((socketId) => {
+            socket.to(socketId).emit("group:chatDeleted", { chatId });
+          });
+        });
+      }
+    } else {
+      const chat = await Chat.findById(chatId).select("senderId receiverId");
+      if (chat) {
+        const { senderId, receiverId } = chat;
+        [senderId, receiverId].forEach(async (userId) => {
+          const user = await User.findById(userId).select("socketIds");
+          user?.socketIds.forEach((socketId) => {
+            socket.to(socketId).emit("personal:chatDeleted", { chatId });
+          });
+        });
+      }
+    }
   };
 
+  // Handle joining a group
+  const handleJoinGroup = async (groupId: string) => {
+    const group = await Group.findById(groupId).select("members");
+    if (group) {
+      group.members.forEach(async (member) => {
+        const memberData = await User.findById(member).select("socketIds");
+        memberData?.socketIds.forEach((socketId) => {
+          socket.to(socketId).emit("group:joined", { groupId, newMember: id });
+        });
+      });
+    }
+  };
+
+  // Handle disconnect event
   const disconnectEvent = async () => {
-    socket.broadcast.emit("currentlyOffline", { id });
-    await User.findByIdAndUpdate(id, { isOnline: false });
+    const user = await User.findById(id);
+    if (user) {
+      user.socketIds = user.socketIds.filter((socketId) => socketId !== socket.id);
+      if (user.socketIds.length === 0) {
+        user.isOnline = false;
+        socket.broadcast.emit("currentlyOffline", { id });
+      }
+      await user.save();
+    }
   };
 
-  // initialize the socket events with the handlers
-
+  // Register event handlers
   updateOnlineStatus();
 
   socket.on("chats:new", handleNewChats);
-
   socket.on("chats:deleted", handleDeletedChat);
-
+  socket.on("group:join", handleJoinGroup);
   socket.on("disconnect", disconnectEvent);
 };

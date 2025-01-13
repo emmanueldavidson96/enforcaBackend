@@ -11,6 +11,10 @@ const chatSchema = new Schema<IChat>(
       type: Types.ObjectId,
       ref: "User",
     },
+    groupId: {
+      type: Types.ObjectId,
+      ref: "Group",
+    },
     message: {
       type: String,
       required: true,
@@ -26,7 +30,7 @@ const chatSchema = new Schema<IChat>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 //Export the model

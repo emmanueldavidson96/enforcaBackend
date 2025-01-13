@@ -15,11 +15,16 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   isOnline: {
-    type: String,
+    type: Boolean,
+    default: false,
   },
   phoneNumber: {
     type: String,
     required: true,
+  },
+  socketIds: {
+    type: [String], // Array of socket IDs for handling multiple devices
+    default: [],
   },
 });
 

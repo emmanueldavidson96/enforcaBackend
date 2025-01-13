@@ -1,18 +1,29 @@
 import express, { Request, Response } from "express";
 import { Server, Socket } from "socket.io";
 import { registerChatHandlers } from "./socket/chatHandler.socket";
+import { chatRouter } from "./routes/Chat.Route";
+import { notFound } from "./middleware/notFound.middleware";
+import { errHandler } from "./middleware/errHandler.middleware";
 
 const app = express();
 
 const PORT = 8080;
 
-app.use("/", (request:Request, response:Response) => {
-    response.send("Welcome to Enforca Backend API")
-})
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use("/", (request: Request, response: Response) => {
+  response.send("Welcome to Enforca Backend API");
+});
+
+app.use("/api/chat", chatRouter);
+
+app.use(notFound);
+app.use(errHandler);
 
 const server = app.listen(PORT, () => {
-    console.log(`App is running at port ${PORT}`)
-})
+  console.log(`App is running at port ${PORT}`);
+});
 
 const io = new Server(server, {
   cors: {
@@ -36,7 +47,7 @@ const io = new Server(server, {
 // });
 
 // connection handler
-const onConnection = (socket:Socket) => {
+const onConnection = (socket: Socket) => {
   registerChatHandlers(io, socket);
 };
 
