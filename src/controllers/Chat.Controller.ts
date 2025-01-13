@@ -18,7 +18,7 @@ const createChat = async (req: Request, res: Response, next: NextFunction) => {
 
     const myChat = await Chat.findById(chat._id).populate({
       path: "senderId",
-      select: "userName fullName displayImage isOnline email phone role",
+      select: "name isOnline email phone",
     });
     return res.status(status.OK).json({
       status: "success",

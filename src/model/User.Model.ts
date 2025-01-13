@@ -14,6 +14,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  isOnline: {
+    type: String,
+  },
   phoneNumber: {
     type: String,
     required: true,
