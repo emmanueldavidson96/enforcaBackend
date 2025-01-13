@@ -1,11 +1,11 @@
 import status from "http-status";
 import { Chat } from "../model/Chat.Model";
 import { Request, Response, NextFunction } from "express";
+import { validateDbId } from "../utils/mongoId.utils";
 
-const createChat = async (req:Request, res:Response, next:NextFunction) => {
+const createChat = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { senderId, receiverId, message, sentAt, date } =
-      req.body;
+    const { senderId, receiverId, message, sentAt, date } = req.body;
     await validateDbId(senderId, receiverId);
 
     const chat = await Chat.create({
@@ -32,7 +32,7 @@ const createChat = async (req:Request, res:Response, next:NextFunction) => {
   }
 };
 
-const deleteChat = AsyncHandler(async (req, res, next) => {
+const deleteChat = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     await validateDbId(id);
@@ -43,7 +43,7 @@ const deleteChat = AsyncHandler(async (req, res, next) => {
         message: "This message was deleted",
         status: "deleted",
       },
-      { new: true }
+      { new: true },
     );
 
     return res.status(status.OK).json({
@@ -56,36 +56,40 @@ const deleteChat = AsyncHandler(async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-});
+};
 
-const loadOldChats = AsyncHandler(async (req, res, next) => {
- try {
-  const { senderId, receiverId } = req.params;
+const loadOldChats = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { senderId, receiverId } = req.params;
 
-  const chats = await Chat.find({
-    $or: [
-      { senderId, receiverId },
-      { senderId: receiverId, receiverId: senderId },
-    ],
-  }).populate({
-    path: "senderId",
-    select: "fullName displayImage isOnline email phone role",
-  });
-  
-  return res.status(status.OK).json({
-    status: "success",
-    statusCode: status.OK,
-    data: {
-      chats
-    },
-  });
- } catch (error) {
-    next(error)
- }
-});
+    const chats = await Chat.find({
+      $or: [
+        { senderId, receiverId },
+        { senderId: receiverId, receiverId: senderId },
+      ],
+    }).populate({
+      path: "senderId",
+      select: "fullName displayImage isOnline email phone role",
+    });
+
+    return res.status(status.OK).json({
+      status: "success",
+      statusCode: status.OK,
+      data: {
+        chats,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 module.exports = {
   createChat,
   deleteChat,
-  loadOldChats
+  loadOldChats,
 };
