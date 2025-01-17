@@ -1,8 +1,14 @@
 import { Request, Response } from "express";
-
+import bodyParser from "body-parser";
+import jobRouter from '../src/routes/index'
 const express = require("express");
 
 const app = express();
+
+
+app.use('/', jobRouter)
+
+app.use(bodyParser.json())
 
 const PORT = 8080;
 
