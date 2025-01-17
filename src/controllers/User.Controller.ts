@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-const UserModel= require("./model/User.Model.ts");
+
+const UserModel= require ("./model/User.Model.ts");
 
 export const signupUser = async (request:Request, response:Response) => {
     const {email, password, name, phoneNumber} = request.body;
