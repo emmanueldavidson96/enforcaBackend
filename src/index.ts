@@ -1,15 +1,14 @@
-import { Request, Response } from "express";
+import "dotenv/config";
+import mongoose from "mongoose";
+import morgan from "morgan";
+import createHttpError, {isHttpError} from "http-errors";
+import cors from "cors";
+import env from "./utils/validateEnv";
+import app from "./app";
+import { connectDB } from "./db/connectDB";
 
-const express = require("express");
 
-const app = express();
-
-const PORT = 8080;
-
-app.use("/", (request:Request, response:Response) => {
-    response.send("Welcome to Enforca Backend API")
-})
-
-app.listen(PORT, () => {
-    console.log(`App is running at port ${PORT}`)
+app.listen(env.PORT, () => {
+    connectDB()
+    console.log(`Application is running at port ${env.PORT}`)
 })

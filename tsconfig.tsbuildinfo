@@ -1,1 +1,1 @@
-{"root":["./src/index.ts","./src/controllers/user.controller.ts","./src/model/user.model.ts"],"version":"5.7.2"}
+{"root":["./src/app.ts","./src/index.ts","./src/@types/sessions.d.ts","./src/controllers/user.controller.ts","./src/db/connectdb.ts","./src/mails/emailtemplates.ts","./src/mails/emails.ts","./src/mails/mailtrap.config.ts","./src/middlewares/multer.ts","./src/middlewares/verifytoken.ts","./src/models/user.model.ts","./src/routes/user.routes.ts","./src/utils/generateverificationtokenandsetcookie.ts","./src/utils/validateenv.ts"],"version":"5.7.2"}
