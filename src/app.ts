@@ -6,10 +6,12 @@ import cors from "cors";
 import env from "./utils/validateEnv";
 import userRoutes from "./routes/user.routes";
 import cookieParser from "cookie-parser";
+import { chatRouter } from "./routes/chat.route";
 
 // Middlewares
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 app.use(cookieParser());
 
@@ -20,6 +22,7 @@ app.use(cors({
 
 //Routes
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/chat", chatRouter);
 
 
 //Error Handling
