@@ -43,6 +43,14 @@ const userSchema = new mongoose.Schema({
     userDescription:{
         type:String
     },
+    isOnline: {
+      type: Boolean,
+      default: false,
+    },
+    socketIds: {
+      type: [String], // Array of socket IDs for handling multiple devices
+      default: [],
+    },
     resetPasswordToken:String,
     resetPasswordExpiresAt:Date,
     verificationToken:String,

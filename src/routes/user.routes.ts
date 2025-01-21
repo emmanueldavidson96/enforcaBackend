@@ -1,5 +1,5 @@
 import express from "express";
-import * as Controller from "../controllers/user.controller";
+import * as Controller from "../controllers/User.Controller";
 import verifyToken from "../middlewares/verifyToken";
 import upload from "../middlewares/multer";
 
