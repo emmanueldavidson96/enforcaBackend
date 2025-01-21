@@ -8,10 +8,10 @@ type clientData = {
   receiverId: string;
   groupId: string;
   message: string;
-}
+};
 
 export const registerChatHandlers = (io: Server, socket: Socket) => {
-  const id:string = socket.handshake.auth.id;
+  const id: string = socket.handshake.headers.id as string;
 
   // Add the new socket ID to the user's array of socket IDs
   const updateOnlineStatus = async () => {
@@ -57,7 +57,10 @@ export const registerChatHandlers = (io: Server, socket: Socket) => {
   };
 
   // Handle chat deletion
-  const handleDeletedChat = async (data: { chatId: string; groupId?: string }) => {
+  const handleDeletedChat = async (data: {
+    chatId: string;
+    groupId?: string;
+  }) => {
     const { chatId, groupId } = data;
 
     if (groupId) {
@@ -85,7 +88,8 @@ export const registerChatHandlers = (io: Server, socket: Socket) => {
   };
 
   // Handle joining a group
-  const handleJoinGroup = async (groupId: string) => {
+  const handleJoinGroup = async (data: { groupId: string }) => {
+    const { groupId } = data;
     const group = await Group.findById(groupId).select("members");
     if (group) {
       group.members.forEach(async (member) => {
@@ -101,7 +105,9 @@ export const registerChatHandlers = (io: Server, socket: Socket) => {
   const disconnectEvent = async () => {
     const user = await User.findById(id);
     if (user) {
-      user.socketIds = user.socketIds.filter((socketId) => socketId !== socket.id);
+      user.socketIds = user.socketIds.filter(
+        (socketId) => socketId !== socket.id,
+      );
       if (user.socketIds.length === 0) {
         user.isOnline = false;
         socket.broadcast.emit("currentlyOffline", { id });
