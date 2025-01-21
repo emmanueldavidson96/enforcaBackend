@@ -150,7 +150,7 @@ export const loadOldChats:RequestHandler = async (
 ) => {
   try {
     const { senderId, receiverId } = req.params;
-
+   
     const chats = await Chat.find({
       $or: [
         { senderId, receiverId },
