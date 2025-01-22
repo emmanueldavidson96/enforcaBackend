@@ -5,6 +5,9 @@ import createHttpError, {isHttpError} from "http-errors";
 import cors from "cors";
 import env from "./utils/validateEnv";
 import userRoutes from "./routes/user.routes";
+import jobRoutes from './routes/job.routes'
+import adminRoutes from './routes/admin.routes'
+import applicationRoutes from './routes/application.route'
 import cookieParser from "cookie-parser";
 
 // Middlewares
@@ -19,7 +22,11 @@ app.use(cors({
 }));
 
 //Routes
+app.use("/api/v1/admin", adminRoutes);
+app.use("/api/v1/application", applicationRoutes)
+app.use("/api/v1/jobs", jobRoutes);
 app.use("/api/v1/users", userRoutes);
+
 
 
 //Error Handling

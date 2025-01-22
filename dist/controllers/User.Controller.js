@@ -19,9 +19,9 @@ const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const generateVerificationTokenAndSetCookie_1 = __importDefault(require("../utils/generateVerificationTokenAndSetCookie"));
 // Controller to Sign up User
 const SignupHandler = (request, response, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, email, password, phoneNumber, confirmPassword } = request.body;
+    const { name, email, password, phoneNumber, confirmPassword, accountType } = request.body;
     try {
-        if (!name || !email || !password || !phoneNumber || !confirmPassword) {
+        if (!name || !email || !password || !phoneNumber || !confirmPassword || !accountType) {
             throw (0, http_errors_1.default)(400, "Parameters missing!");
         }
         const existingUser = yield user_model_1.default.findOne({
@@ -40,6 +40,7 @@ const SignupHandler = (request, response, next) => __awaiter(void 0, void 0, voi
             password: hashedPassword,
             phoneNumber: phoneNumber,
             confirmPassword: confirmPassword,
+            accountType: accountType,
             isTaskEarner: true
         });
         (0, generateVerificationTokenAndSetCookie_1.default)(response, newUser._id);
@@ -71,13 +72,14 @@ const LoginHandler = (request, response, next) => __awaiter(void 0, void 0, void
         if (!isPasswordMatched) {
             throw (0, http_errors_1.default)(409, "Incorrect password");
         }
-        (0, generateVerificationTokenAndSetCookie_1.default)(response, user._id);
+        const token = (0, generateVerificationTokenAndSetCookie_1.default)(response, user._id);
         user.lastLogin = new Date();
         yield user.save();
         response.status(201).json({
             success: true,
             message: "User logged In! ",
-            user
+            user,
+            token
         });
     }
     catch (error) {

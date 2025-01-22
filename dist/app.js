@@ -42,6 +42,9 @@ const morgan_1 = __importDefault(require("morgan"));
 const http_errors_1 = __importStar(require("http-errors"));
 const cors_1 = __importDefault(require("cors"));
 const user_routes_1 = __importDefault(require("./routes/user.routes"));
+const job_routes_1 = __importDefault(require("./routes/job.routes"));
+const admin_routes_1 = __importDefault(require("./routes/admin.routes"));
+const application_route_1 = __importDefault(require("./routes/application.route"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 // Middlewares
 const app = (0, express_1.default)();
@@ -53,6 +56,9 @@ app.use((0, cors_1.default)({
     credentials: true
 }));
 //Routes
+app.use("/api/v1/admin", admin_routes_1.default);
+app.use("api/v1/application", application_route_1.default);
+app.use("/api/v1/jobs", job_routes_1.default);
 app.use("/api/v1/users", user_routes_1.default);
 //Error Handling
 app.use((request, response, next) => {

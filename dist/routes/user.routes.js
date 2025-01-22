@@ -37,7 +37,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const Controller = __importStar(require("../controllers/user.controller"));
+const Controller = __importStar(require("../controllers/User.Controller"));
 const verifyToken_1 = __importDefault(require("../middlewares/verifyToken"));
 const multer_1 = __importDefault(require("../middlewares/multer"));
 const router = express_1.default.Router();

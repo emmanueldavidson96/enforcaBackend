@@ -3,7 +3,7 @@ import createHttpError from "http-errors";
 import userModel from "../models/user.model";
 import bcrypt from "bcryptjs";
 import generateTokenAndSetCookie from "../utils/generateVerificationTokenAndSetCookie";
-
+import { AccountType } from "../models/user.model";
 
 interface SignUpBody{
     firstName?:string,
@@ -12,13 +12,14 @@ interface SignUpBody{
     lastName?:string,
     phoneNumber?:string,
     confirmPassword?:string,
+    accountType?:AccountType
 }
 
 // Controller to Sign up User
 export const SignupHandler:RequestHandler = async (request:Request, response:Response, next:NextFunction) => {
-    const {name, email, password, phoneNumber, confirmPassword} = request.body;
+    const {name, email, password, phoneNumber, confirmPassword,accountType} = request.body;
     try{
-        if(!name || !email || !password || !phoneNumber || !confirmPassword){
+        if(!name || !email || !password || !phoneNumber || !confirmPassword || !accountType){
             throw createHttpError(400, "Parameters missing!")
         }
         const existingUser = await userModel.findOne({
@@ -38,6 +39,7 @@ export const SignupHandler:RequestHandler = async (request:Request, response:Res
             password:hashedPassword,
             phoneNumber: phoneNumber,
             confirmPassword:confirmPassword,
+            accountType:accountType,
             isTaskEarner:true
         })
         generateTokenAndSetCookie(response, newUser._id);
@@ -46,6 +48,7 @@ export const SignupHandler:RequestHandler = async (request:Request, response:Res
             message:"User created and saved!",
             newUser
         })
+
     }catch(error){
         next(error)
     }
@@ -70,13 +73,13 @@ export const LoginHandler:RequestHandler = async (request:Request, response:Resp
         if(!isPasswordMatched){
             throw createHttpError(409, "Incorrect password")
         }
-        generateTokenAndSetCookie(response, user._id);
+       const token = generateTokenAndSetCookie(response, user._id);
         user.lastLogin = new Date();
         await user.save()
         response.status(201).json({
             success:true,
             message:"User logged In! ",
-            user
+            user,
         })
     }catch(error){
         next(error)
@@ -159,3 +162,4 @@ export const LogoutUserHandler:RequestHandler = async (request:Request, response
         next(error)
     }
 }
+

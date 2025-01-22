@@ -1,5 +1,14 @@
 import mongoose from "mongoose";
 
+export enum AccountType{
+    Company= "company",
+    Seeker = "seeker",
+}
+export enum Role {
+    Admin = "admin",
+    User = "user"
+}
+
 const userSchema = new mongoose.Schema({
     email:{
         type:String,
@@ -30,6 +39,16 @@ const userSchema = new mongoose.Schema({
         type:Boolean,
         default:false
     },
+    accountType:{
+        type:String,
+        enum:Object.values(AccountType),
+        default:AccountType.Seeker
+    },
+    role:{
+        type:String,
+        enum:Object.values(Role),
+        default:Role.User
+    },
     isAdmin:{
         type:String,
         default:false
@@ -43,6 +62,8 @@ const userSchema = new mongoose.Schema({
     userDescription:{
         type:String
     },
+    application:[{type:mongoose.Schema.Types.ObjectId, ref:"Application"}],
+    job:[{type:mongoose.Schema.Types.ObjectId, ref:"Job"}],
     resetPasswordToken:String,
     resetPasswordExpiresAt:Date,
     verificationToken:String,
