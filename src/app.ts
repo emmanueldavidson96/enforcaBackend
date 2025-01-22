@@ -6,7 +6,7 @@ import cors from "cors";
 import env from "./utils/validateEnv";
 import userRoutes from "./routes/user.routes";
 import cookieParser from "cookie-parser";
-
+import scheduleRoutes from "./routes/schedule.routes";
 // Middlewares
 const app = express();
 app.use(express.json());
@@ -20,6 +20,7 @@ app.use(cors({
 
 //Routes
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/schedules", scheduleRoutes);
 
 
 //Error Handling
