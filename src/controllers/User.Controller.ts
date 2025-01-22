@@ -1,3 +1,4 @@
+
 import { RequestHandler, Response, Request, NextFunction } from "express";
 import createHttpError from "http-errors";
 import userModel from "../models/user.model";
@@ -8,7 +9,7 @@ import generateTokenAndSetCookie from "../utils/generateVerificationTokenAndSetC
 interface SignUpBody{
     firstName?:string,
     email?:string,
-    password?:string, 
+    password?:string,
     lastName?:string,
     phoneNumber?:string,
     confirmPassword?:string,
@@ -26,12 +27,12 @@ export const SignupHandler:RequestHandler = async (request:Request, response:Res
         }).exec();
         if(existingUser){
             throw createHttpError(409, "Email already exists in the database!");
-        } 
+        }
         if(confirmPassword !== password){
             throw createHttpError(409, "confirm password!")
         }
         const hashedPassword = await bcrypt.hash(password, 10);
-        
+
         const newUser = await userModel.create({
             name:name,
             email:email,
@@ -53,7 +54,7 @@ export const SignupHandler:RequestHandler = async (request:Request, response:Res
 
 
 
-//Controller to Login 
+//Controller to Login
 export const LoginHandler:RequestHandler = async (request:Request, response:Response, next:NextFunction) => {
     const {email, password} = request.body;
     try{
@@ -65,7 +66,7 @@ export const LoginHandler:RequestHandler = async (request:Request, response:Resp
         })
         if(!user){
             throw createHttpError(409, "Invalid credentials")
-        }        
+        }
         const isPasswordMatched = await bcrypt.compare(password, user.password)
         if(!isPasswordMatched){
             throw createHttpError(409, "Incorrect password")
