@@ -16,8 +16,17 @@ router.get("/upcoming-events", verifyToken, Controller.getUpcomingEventsHandler)
 // Get schedule details
 router.get("/schedule/:id", verifyToken, Controller.getScheduleDetailsHandler);
 
+// Get schedules by type
+router.get("/schedules/:eventType", verifyToken, Controller.getSchedulesByTypeHandler);
+
+// Get today's schedule
+router.get("/today-schedule", verifyToken, Controller.getTodayScheduleHandler);
+
 // Update schedule
 router.put("/update-schedule/:id", verifyToken, Controller.updateScheduleHandler);
+
+// Cancel schedule
+router.put("/cancel-schedule/:id", verifyToken, Controller.cancelScheduleHandler);
 
 // Delete schedule
 router.delete("/delete-schedule/:id", verifyToken, Controller.deleteScheduleHandler);
