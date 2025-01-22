@@ -64,7 +64,8 @@ export const getUpcomingEventsHandler: RequestHandler = async (request: Request,
         const currentDate = new Date();
         const schedules = await scheduleModel.find({
             organizer: request.userId,
-            startDate: { $gte: currentDate }
+            startDate: { $gte: currentDate },
+            status: { $ne: 'cancelled' }
         })
             .sort({ startDate: 1 })
             .limit(5);
@@ -145,6 +146,77 @@ export const getScheduleDetailsHandler: RequestHandler = async (request: Request
         response.status(200).json({
             success: true,
             message: "Schedule details retrieved successfully!",
+            schedule
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Get Schedules By Type
+export const getSchedulesByTypeHandler: RequestHandler = async (request: Request, response: Response, next: NextFunction) => {
+    const { eventType } = request.params;
+    try {
+        const schedules = await scheduleModel.find({
+            organizer: request.userId,
+            eventType: eventType,
+            status: { $ne: 'cancelled' }
+        }).sort({ startDate: 1 });
+
+        response.status(200).json({
+            success: true,
+            message: `${eventType} schedules retrieved successfully`,
+            schedules
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Get Today's Schedule
+export const getTodayScheduleHandler: RequestHandler = async (request: Request, response: Response, next: NextFunction) => {
+    try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const schedules = await scheduleModel.find({
+            organizer: request.userId,
+            startDate: { $gte: today, $lt: tomorrow },
+            status: { $ne: 'cancelled' }
+        }).sort({ startDate: 1 });
+
+        response.status(200).json({
+            success: true,
+            message: "Today's schedules retrieved successfully",
+            schedules
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Cancel Schedule
+export const cancelScheduleHandler: RequestHandler = async (request: Request, response: Response, next: NextFunction) => {
+    const { id } = request.params;
+    try {
+        const schedule = await scheduleModel.findOneAndUpdate(
+            { _id: id, organizer: request.userId },
+            {
+                status: 'cancelled',
+                cancellationReason: request.body.reason || 'No reason provided'
+            },
+            { new: true }
+        );
+
+        if (!schedule) {
+            throw createHttpError(404, "Schedule not found or unauthorized!");
+        }
+
+        response.status(200).json({
+            success: true,
+            message: "Schedule cancelled successfully!",
             schedule
         });
     } catch (error) {
